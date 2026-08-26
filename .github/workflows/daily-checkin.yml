@@ -1,0 +1,24 @@
+name: Daily Solve Check-in
+
+on:
+  schedule:
+    # 08:00 KST == 23:00 UTC (previous day)
+    - cron: "0 23 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check-in:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check yesterday's commits and notify Slack
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          USERS: connandgo,dokwon33
+        run: python scripts/check_daily_solve.py
