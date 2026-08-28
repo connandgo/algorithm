@@ -5,9 +5,13 @@ on:
     # GitHub scheduled runs may be delayed or dropped. Retry from 08:00 to 08:50 KST;
     # the daily cache below ensures Slack is notified only once.
     - cron: "0,10,20,30,40,50 23 * * *"
-    # Temporary automatic-run test: 10:10 KST == 01:10 UTC.
-    - cron: "10 1 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force_notify:
+        description: Send even if today's notification already ran
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -33,7 +37,7 @@ jobs:
         run: echo "kst=$(date +%F)" >> "$GITHUB_OUTPUT"
 
       - name: Check today's notification marker
-        if: github.event_name == 'schedule'
+        if: inputs.force_notify != true
         id: notification-cache
         uses: actions/cache/restore@v4
         with:
@@ -41,7 +45,7 @@ jobs:
           key: daily-checkin-${{ steps.date.outputs.kst }}
 
       - name: Check yesterday's commits and notify Slack
-        if: github.event_name == 'workflow_dispatch' || steps.notification-cache.outputs.cache-hit != 'true'
+        if: inputs.force_notify == true || steps.notification-cache.outputs.cache-hit != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -49,11 +53,11 @@ jobs:
         run: python scripts/check_daily_solve.py
 
       - name: Create today's notification marker
-        if: github.event_name == 'schedule' && steps.notification-cache.outputs.cache-hit != 'true'
+        if: inputs.force_notify != true && steps.notification-cache.outputs.cache-hit != 'true'
         run: touch .daily-checkin-marker
 
       - name: Save today's notification marker
-        if: github.event_name == 'schedule' && steps.notification-cache.outputs.cache-hit != 'true'
+        if: inputs.force_notify != true && steps.notification-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: .daily-checkin-marker

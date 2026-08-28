@@ -12,3 +12,12 @@
 2. 이 저장소 `Settings > Secrets and variables > Actions`에서 `SLACK_WEBHOOK_URL` 이름으로 시크릿을 등록합니다.
 3. 그 외 별도 설정은 필요 없습니다. `.github/workflows/daily-checkin.yml`이 매일 자동 실행됩니다.
 4. 바로 테스트하려면 저장소의 `Actions` 탭 > `Daily Solve Check-in` > `Run workflow`로 수동 실행할 수 있습니다.
+
+### macOS 정시 실행
+
+GitHub 예약 실행의 지연이나 누락을 보완하기 위해 macOS `launchd`가 매일 08:00(KST)에
+워크플로를 직접 호출합니다. GitHub 예약 실행과 겹쳐도 날짜별 캐시로 Slack 알림은 한 번만 전송됩니다.
+
+- LaunchAgent: `launchd/com.connandgo.algorithm-daily-checkin.plist`
+- 호출 스크립트: `scripts/trigger_daily_checkin.sh`
+- 실행 로그: `~/Library/Logs/algorithm-daily-checkin.log`
