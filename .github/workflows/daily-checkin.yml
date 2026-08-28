@@ -2,8 +2,9 @@ name: Daily Solve Check-in
 
 on:
   schedule:
-    # 08:00 KST == 23:00 UTC (previous day)
-    - cron: "0 23 * * *"
+    # 08:05 KST == 23:05 UTC (previous day)
+    # Avoid the top-of-hour Actions queue where scheduled runs are often delayed.
+    - cron: "5 23 * * *"
   workflow_dispatch: {}
 
 jobs:
