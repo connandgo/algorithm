@@ -1,7 +1,7 @@
 """Daily check-in bot.
 
-Checks whether each user pushed a commit touching their folder in the last
-24 hours (KST) and posts the result to Slack via an incoming webhook.
+Checks whether each GitHub user authored a commit during the previous day
+(KST) and posts the result to Slack via an incoming webhook.
 Runs as a scheduled GitHub Action; no third-party dependencies required.
 """
 
@@ -19,7 +19,7 @@ KST = timezone(timedelta(hours=9))
 def get_commit_count(repo: str, user: str, since_iso: str, until_iso: str, token: str) -> int:
     url = (
         f"https://api.github.com/repos/{repo}/commits"
-        f"?path={urllib.parse.quote(user)}&since={since_iso}&until={until_iso}&per_page=10"
+        f"?author={urllib.parse.quote(user)}&since={since_iso}&until={until_iso}&per_page=10"
     )
     req = urllib.request.Request(
         url,
